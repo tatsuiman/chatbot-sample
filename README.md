@@ -2,6 +2,8 @@
 
 langchainを使ってローカルチャットボットを構築するサンプル
 
+[ChatGPTで社内用チャットボットを作った話](https://zenn.dev/tatsui/articles/langchain-chatbot)の記事で仕組みを紹介しています。
+
 ## ベクトルデータベースの作成
 ```bash
 ingest.py [OPTIONS] TARGET
