@@ -1,4 +1,4 @@
-# langchain chatgpt
+# chatbot sample
 
 langchainを使ってローカルチャットボットを構築するサンプル
 
