@@ -1,5 +1,5 @@
 """Main entrypoint for the app."""
-import sys
+import os
 import logging
 import pickle
 from pathlib import Path
@@ -17,13 +17,14 @@ app = FastAPI()
 templates = Jinja2Templates(directory="templates")
 vectorstore: Optional[VectorStore] = None
 
+DB_FILE=os.environ.get("DB_FILE", "/data/vectorstore.pkl")
 
 @app.on_event("startup")
 async def startup_event():
     logging.info("loading vectorstore")
-    if not Path(sys.argv[1]).exists():
-        raise ValueError(f"{sys.argv[1]} does not exist, please run ingest.py first")
-    with open(sys.argv[1], "rb") as f:
+    if not Path(DB_FILE).exists():
+        raise ValueError(f"{DB_FILE} does not exist, please run ingest.py first")
+    with open(DB_FILE, "rb") as f:
         global vectorstore
         vectorstore = pickle.load(f)
 

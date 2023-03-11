@@ -17,9 +17,9 @@ logger = logging.getLogger()
 logger.setLevel(logging.INFO)
 
 @click.command()
-@click.option('--vectorstore-path', '-f', type=click.Path(exists=True), help='Path to the vectorstore pkl file')
-def main(vectorstore_path):
-    with open(vectorstore_path, "rb") as f:
+@click.option('--pkl-path', '-f', default='/data/vectorstore.pkl', type=click.Path(exists=True), help='Path to the vectorstore pkl file')
+def main(pkl_path):
+    with open(pkl_path, "rb") as f:
         vectorstore = pickle.load(f)
 
     manager = CallbackManager([StreamingStdOutCallbackHandler(), OpenAICallbackHandler()])

@@ -1,10 +1,11 @@
 openai
+tiktoken==0.3.0
 fastapi
 black
 isort
 websockets
 pydantic
-langchain
+langchain==0.0.105
 uvicorn
 jinja2
 faiss-cpu

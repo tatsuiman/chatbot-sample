@@ -5,18 +5,19 @@ langchainを使ってローカルチャットボットを構築するサンプ�
 
 [ChatGPTで社内用チャットボットを作った話](https://zenn.dev/tatsui/articles/langchain-chatbot)の記事で仕組みを紹介しています。
 
-## インストール
-```
-pip install -r requirements.txt
-```
-
 ## APIキーの設定
 ```
 export OPENAI_API_KEY=<Open AI API Key>
 ```
 
+## インストール
+```
+docker-compose up -d --build chatbot
+```
+
 ## ベクトルデータベースの作成
 ```bash
+docker-compose exec chatbot python /app/ingest.py --help
 ingest.py [OPTIONS] TARGET
 ```
 TARGET : 処理するファイルやディレクトリのパスを指定します。(必須項目)  
@@ -30,11 +31,11 @@ TARGET : 処理するファイルやディレクトリのパスを指定しま�
 * `-co, --chunk-overlap INTEGER` : テキストチャンクのオーバーラップを指定します。デフォルトは 200 です。
 * `-d, --dry-run` : ドキュメントをベクトルストアに実際に追加しない。
 
-例えば、/data ディレクトリにあるすべてのPDFファイルを処理して、データベースファイルを output.pkl に指定する場合は、以下のようにします。  
+例えば、./data/pdf ディレクトリにあるすべてのPDFファイルを処理して、データベースファイルを output.pkl に指定する場合は、以下のようにします。  
 `-d`オプションをつける事でデータベース構築を行わずに消費されるトークン数と料金を確認することができます。
 
 ```bash
-python ingest.py -e pdf -l pdf_miner -o output.pkl -d /data
+docker-compose exec chatbot python app/ingest.py -e pdf -l pdf_miner -o output.pkl -d /data/pdf
 load 654 documents
 use 338462 token
 price 0.0169231 USD
@@ -43,10 +44,6 @@ Dry run mode enabled. Exiting without adding documents to vectorstore.
 
 ## ChatBOTの起動
 ```bash
-python chat-cli.py -f output.pkl
-```
-
-## WebUI
-```bash
-python webui.py output.pkl
+export DB_FILE=/data/output.pkl
+docker-compose up -d chatbot
 ```

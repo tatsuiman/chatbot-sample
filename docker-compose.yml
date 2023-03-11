@@ -5,5 +5,16 @@ services:
     image: ghcr.io/ddiu8081/chatgpt-demo:main
     ports:
       - 3000:3000
-    env_file:
-      - .env
+    environment:
+      - OPENAI_API_KEY=${OPENAI_API_KEY}
+
+  chatbot:
+    build: ./docker/chatbot
+    ports:
+      - 9000:9000
+    environment:
+      - DB_FILE=${DB_FILE}
+      - OPENAI_API_KEY=${OPENAI_API_KEY}
+    volumes: 
+      - ./data:/data
+    restart: always
