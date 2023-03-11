@@ -4,6 +4,11 @@ langchainを使ってローカルチャットボットを構築するサンプ�
 
 [ChatGPTで社内用チャットボットを作った話](https://zenn.dev/tatsui/articles/langchain-chatbot)の記事で仕組みを紹介しています。
 
+## APIキーの設定
+```
+export OPENAI_API_KEY=<Open AI API Key>
+```
+
 ## ベクトルデータベースの作成
 ```bash
 ingest.py [OPTIONS] TARGET
