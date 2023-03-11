@@ -39,3 +39,8 @@ Dry run mode enabled. Exiting without adding documents to vectorstore.
 ```bash
 python chat-cli.py -f output.pkl
 ```
+
+## WebUI
+```bash
+python main.py output.pkl
+```
