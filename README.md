@@ -48,5 +48,5 @@ python chat-cli.py -f output.pkl
 
 ## WebUI
 ```bash
-python main.py output.pkl
+python webui.py output.pkl
 ```
