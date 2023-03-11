@@ -1,6 +1,7 @@
 # chatbot sample
 
-langchainを使ってローカルチャットボットを構築するサンプル
+langchainを使ってローカルチャットボットを構築するサンプル  
+[chat-langchain](https://github.com/hwchase17/chat-langchain)を参考に作りました。
 
 [ChatGPTで社内用チャットボットを作った話](https://zenn.dev/tatsui/articles/langchain-chatbot)の記事で仕組みを紹介しています。
 

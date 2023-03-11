@@ -62,7 +62,7 @@ def ingest_docs(target, output_file, loader_cls, file_ext, chunk_size, chunk_ove
     token_count = len(encoding.encode(text, allowed_special='all'))
     # https://openai.com/pricing
     print(f"use {token_count} token")
-    print(f"price {token_count*0.00000004} USD")
+    print(f"price {token_count*0.0000004} USD")
     if dry_run:
         print("Dry run mode enabled. Exiting without adding documents to vectorstore.")
         return
