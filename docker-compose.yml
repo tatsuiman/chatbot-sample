@@ -1,13 +1,6 @@
 version: "3.4"
 
 services:
-  chatgpt:
-    image: ghcr.io/ddiu8081/chatgpt-demo:main
-    ports:
-      - 3000:3000
-    environment:
-      - OPENAI_API_KEY=${OPENAI_API_KEY}
-
   chatbot:
     build: ./docker/chatbot
     ports:
