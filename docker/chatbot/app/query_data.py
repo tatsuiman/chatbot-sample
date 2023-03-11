@@ -36,7 +36,7 @@ def get_chain(
         streaming=True,
         callback_manager=stream_manager,
         verbose=True,
-        temperature=0,
+        temperature=0.5,
     )
 
     question_generator = LLMChain(
