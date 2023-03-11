@@ -66,7 +66,7 @@ def ingest_docs(target, output_file, loader_cls, file_ext, chunk_size, chunk_ove
     if dry_run:
         print("Dry run mode enabled. Exiting without adding documents to vectorstore.")
         return
-    if os.path.exists("vectorstore.pkl"):
+    if os.path.exists(output_file):
         with open(output_file, "rb") as f:
             vectorstore = pickle.load(f)
             vectorstore.add_documents(documents)
