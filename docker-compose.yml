@@ -10,4 +10,5 @@ services:
       - OPENAI_API_KEY=${OPENAI_API_KEY}
     volumes: 
       - ./data:/data
+      - ./samples:/samples
     restart: always
