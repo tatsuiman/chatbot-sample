@@ -24,18 +24,18 @@ def main(pkl_path):
 
     manager = CallbackManager([StreamingStdOutCallbackHandler(), OpenAICallbackHandler()])
 
-    streaming_llm = OpenAIChat(streaming=True, callback_manager=manager, verbose=True, temperature=0)
+    streaming_llm = OpenAIChat(streaming=True, callback_manager=manager, verbose=True, temperature=0.7)
     question_gen_llm = OpenAIChat(temperature=0, verbose=True, callback_manager=manager)
 
     question_generator = LLMChain(llm=question_gen_llm, prompt=CONDENSE_QUESTION_PROMPT)
 
     # 回答に情報ソースを表示する場合
-    doc_chain = load_qa_with_sources_chain(
-        streaming_llm, 
-        chain_type="stuff",
-        callback_manager=manager,
-    )
-    #doc_chain = load_qa_chain(streaming_llm, chain_type="stuff", prompt=QA_PROMPT)
+    #doc_chain = load_qa_with_sources_chain(
+    #    streaming_llm, 
+    #    chain_type="stuff",
+    #    callback_manager=manager,
+    #)
+    doc_chain = load_qa_chain(streaming_llm, chain_type="stuff", prompt=QA_PROMPT)
 
     chat_history = []
     qa = ChatVectorDBChain(vectorstore=vectorstore, combine_docs_chain=doc_chain, question_generator=question_generator)
