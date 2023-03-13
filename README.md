@@ -44,7 +44,7 @@ Dry run mode enabled. Exiting without adding documents to vectorstore.
 
 ## ChatBOTの起動
 先ほど保存したデータベースファイルを環境変数に設定しチャットボットを起動します。  
-チャットボットにはブラウザから「http://localhost:9000」へ接続して下さい。
+チャットボットにはブラウザから「 http://localhost:9000 」へ接続して下さい。
 ```bash
 export DB_FILE=/data/output.pkl
 docker-compose up -d chatbot
