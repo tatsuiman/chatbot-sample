@@ -44,10 +44,10 @@ Dry run mode enabled. Exiting without adding documents to vectorstore.
 
 ## ChatBOTの起動
 先ほど保存したデータベースファイルを環境変数に設定しチャットボットを起動します。  
-チャットボットにはブラウザから「 http://localhost:9000 」へ接続して下さい。
+チャットボットにはブラウザから「 http://localhost:3000 」へ接続して下さい。
 ```bash
 export DB_FILE=/data/output.pkl
-docker-compose up -d chatbot
+docker-compose up -d
 ```
 
 ## コマンドラインからチャットボットを利用する
@@ -56,3 +56,7 @@ docker-compose up -d chatbot
 ```bash
 python chat-cli.py -f data/output.pkl
 ```
+
+## 参考
+* https://github.com/ddiu8081/chatgpt-demo
+* https://github.com/hwchase17/chat-langchain

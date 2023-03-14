@@ -2,13 +2,8 @@ openai
 tiktoken==0.3.0
 faiss-cpu==1.7.3
 langchain==0.0.105
-fastapi
-black
 isort
-websockets
 pydantic
-uvicorn
-jinja2
 bs4
 libmagic
 unstructured
