@@ -5,6 +5,9 @@
 
 [ChatGPTで社内用チャットボットを作った話](https://zenn.dev/tatsui/articles/langchain-chatbot)の記事で仕組みを紹介しています。
 
+## Demo
+![](./docs/img/demo.gif)
+
 ## よくある疑問
 * データ利用ポリシーについて
   * APIを経由して顧客から送られたデータ送られたデータは原則として学習に利用しない（学習のデータを共有してもいい、という場合はオプトイン）
