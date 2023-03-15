@@ -14,6 +14,7 @@
   * 悪用の可能性が低いユースケースを展開する企業顧客であれば、APIデータを全く保存しないことを要求できる
 * ChatGPTとChatGPT APIの違い
   * ChatGPT APIは、ChatGPTの機能を使いやすくしたもので、プログラマーが簡単にChatGPTを使うことができるようになります。
+  * 本サンプルではChatGPT APIを利用します。
   * ChatGPT APIを利用するには、OpenAIのアカウントを作成し、APIキーを発行する必要があります。
 
 ## APIキーの設定
