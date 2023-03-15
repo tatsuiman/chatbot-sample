@@ -5,6 +5,7 @@ import MarkdownIt from 'markdown-it'
 import mdKatex from 'markdown-it-katex'
 import mdHighlight from 'markdown-it-highlightjs'
 import markdownItTextualUml from 'markdown-it-textual-uml'
+import markdownItPlantuml from 'markdown-it-plantuml'
 import IconRefresh from './icons/Refresh'
 import { useClipboard, useEventListener } from 'solidjs-use'
 
@@ -41,7 +42,11 @@ export default ({ role, message, showRetry, onRetry }: Props) => {
   const htmlString = () => {
     const md = MarkdownIt()
     md.use(mdKatex).use(mdHighlight)
-    md.use(markdownItTextualUml)
+    const options = {
+        server: `http://${window.location.hostname}:8080/plantuml`
+    }
+    md.use(markdownItTextualUml, options)
+    //md.use(markdownItPlantuml, options)
     const fence = md.renderer.rules.fence!
     md.renderer.rules.fence = (...args) => {
       const [tokens, idx] = args

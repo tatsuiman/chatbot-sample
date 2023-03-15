@@ -3,9 +3,6 @@ version: "3.4"
 services:
   chatbot:
     build: ./docker/chatbot
-    ports:
-      - 9000:9000
-      - 5000:5000
     environment:
       - DB_FILE=${DB_FILE}
       - OPENAI_API_KEY=${OPENAI_API_KEY}
@@ -18,3 +15,10 @@ services:
     build: docker/frontend
     ports:
       - 3000:3000
+  uml:
+    image: plantuml/plantuml-server:tomcat
+    ports:
+      - 8080:8080
+    environment:
+      - BASE_URL=plantuml
+

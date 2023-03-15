@@ -5,7 +5,7 @@ import time
 import pickle
 import openai
 from typing import Any, Dict, List
-from langchain.llms import OpenAIChat
+from langchain.chat_models import ChatOpenAI
 from langchain.chains.llm import LLMChain
 from langchain.callbacks.base import CallbackManager
 from langchain.callbacks.base import BaseCallbackHandler
@@ -44,27 +44,33 @@ class StreamingLLMCallbackHandler(StreamingStdOutCallbackHandler):
 
 def create_qa(sock, temperature=0.5):
     manager = CallbackManager([StreamingLLMCallbackHandler(sock)])
-
-    question_gen_llm = OpenAIChat(temperature=0, verbose=True)
-    question_generator = LLMChain(llm=question_gen_llm, prompt=CONDENSE_QUESTION_PROMPT)
-    streaming_llm = OpenAIChat(streaming=True, callback_manager=manager, verbose=True, temperature=temperature)
+    question_gen_llm = ChatOpenAI(temperature=0, model_name="gpt-3.5-turbo", verbose=True)
+    streaming_llm = ChatOpenAI(
+        streaming=True,
+        model_name="gpt-3.5-turbo",
+        callback_manager=manager,
+        temperature=temperature,
+        verbose=True,
+    )
 
     prompt_template = """Use the following pieces of context to answer the question at the end.
 {context}
 Question: {question}
 Helpful Answer:"""
     QA_PROMPT = PromptTemplate(template=prompt_template, input_variables=["context", "question"])
-    #doc_chain = load_qa_with_sources_chain(
-    #    streaming_llm, 
+    # doc_chain = load_qa_with_sources_chain(
+    #    streaming_llm,
     #    chain_type="stuff"
-    #)
+    # )
     doc_chain = load_qa_chain(streaming_llm, chain_type="stuff", prompt=QA_PROMPT)
-    qa = ChatVectorDBChain(vectorstore=vectorstore, combine_docs_chain=doc_chain, question_generator=question_generator)
+    question_generator = LLMChain(llm=question_gen_llm, prompt=CONDENSE_QUESTION_PROMPT)
+    qa = ChatVectorDBChain(
+        vectorstore=vectorstore, combine_docs_chain=doc_chain, question_generator=question_generator
+    )
     return qa
 
 
 class ApiHandler(BaseHTTPRequestHandler):
-
     def do_POST(self):
         content_len = int(self.headers.get("content-length"))
         post_body = self.rfile.read(content_len).decode("utf-8")
@@ -110,6 +116,7 @@ class ApiHandler(BaseHTTPRequestHandler):
             qa = create_qa(self, temperature)
             qa({"question": question, "chat_history": chat_history})
         self.wfile.write(b"data: [DONE]\n\n")
+
 
 if __name__ == "__main__":
     server_address = ("", PORT)
