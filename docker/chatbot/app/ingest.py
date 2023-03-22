@@ -5,6 +5,8 @@ import tiktoken
 from langchain.embeddings import OpenAIEmbeddings
 from langchain.text_splitter import RecursiveCharacterTextSplitter
 from langchain.vectorstores.faiss import FAISS
+from langchain.vectorstores import Chroma
+
 
 from langchain.document_loaders import (
     TextLoader,
@@ -32,7 +34,7 @@ DIR_LOADER_CLASSES = {
 
 @click.command()
 @click.argument('target')
-@click.option('--output-file', '-o', default='vectorstore.pkl', help='Output file name')
+@click.option('--output-file', '-o', default='/data/vectorstore', help='Output file name')
 @click.option('--loader-cls', '-l', default='text', type=click.Choice(FILE_LOADER_CLASSES.keys()), help='Loader class to use')
 @click.option('--dir-loader-cls', '-dl', default='directory', type=click.Choice(DIR_LOADER_CLASSES.keys()), help='Loader class to use for directories')
 @click.option('--file-ext', '-e', default="*", help='file extention')
@@ -66,17 +68,22 @@ def ingest_docs(target, output_file, loader_cls, file_ext, chunk_size, chunk_ove
     if dry_run:
         print("Dry run mode enabled. Exiting without adding documents to vectorstore.")
         return
-    if os.path.exists(output_file):
-        with open(output_file, "rb") as f:
-            vectorstore = pickle.load(f)
-            vectorstore.add_documents(documents)
-    else:
-        embeddings = OpenAIEmbeddings()
-        vectorstore = FAISS.from_documents(documents, embeddings)
+
+    embeddings = OpenAIEmbeddings()
+    vectorstore = Chroma.from_documents(documents=documents, embedding=embeddings, persist_directory=output_file)
+    vectorstore.persist()
+
+    #if os.path.exists(output_file):
+    #    with open(output_file, "rb") as f:
+    #        vectorstore = pickle.load(f)
+    #        vectorstore.add_documents(documents)
+    #else:
+    #    embeddings = OpenAIEmbeddings()
+    #    vectorstore = FAISS.from_documents(documents, embeddings)
 
     # Save vectorstore
-    with open(output_file, "wb") as f:
-        pickle.dump(vectorstore, f)
+    #with open(output_file, "wb") as f:
+    #    pickle.dump(vectorstore, f)
 
 if __name__ == "__main__":
     ingest_docs()

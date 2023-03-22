@@ -50,7 +50,7 @@ TARGET : 処理するファイルやディレクトリのパスを指定しま�
 `-d`オプションをつける事でデータベース構築を行わずに消費されるトークン数と料金を確認することができます。
 
 ```bash
-docker-compose exec chatbot python app/ingest.py -e pdf -l pdf_miner -o /data/output.pkl -d /samples/pdf
+docker-compose exec chatbot python app/ingest.py -e pdf -l pdf_miner -o /data/output -d /samples/pdf
 load 654 documents
 use 338462 token
 price 0.0169231 USD
@@ -61,7 +61,7 @@ Dry run mode enabled. Exiting without adding documents to vectorstore.
 先ほど保存したデータベースファイルを環境変数に設定しチャットボットを起動します。  
 チャットボットにはブラウザから「 http://localhost:3000 」へ接続して下さい。
 ```bash
-export DB_FILE=/data/output.pkl
+export DB_DIR=/data/output
 docker-compose up -d
 ```
 
@@ -69,7 +69,7 @@ docker-compose up -d
 質問に答えられなかったり、チャットの履歴を使ってMarkdownで図を書く場合は  
 「>」を入力してから質問することでChatGPTへの質問に切り替えることができます。
 ```bash
-python chat-cli.py -f data/output.pkl
+python chat-cli.py -f data/output
 ```
 
 ## 参考

@@ -257,3 +257,5 @@ sw.*
 /test-results/
 /playwright-report/
 /playwright/.cache/
+
+data

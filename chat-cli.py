@@ -11,20 +11,28 @@ from langchain.callbacks.openai_info import OpenAICallbackHandler
 from langchain.chains.chat_vector_db.prompts import CONDENSE_QUESTION_PROMPT, QA_PROMPT
 from langchain.chains.question_answering import load_qa_chain
 from langchain.chains.qa_with_sources import load_qa_with_sources_chain
-from langchain.llms import OpenAIChat
-from langchain.vectorstores.base import VectorStore
-from langchain.chains import ChatVectorDBChain
 from langchain.prompts.prompt import PromptTemplate
+from langchain.embeddings.openai import OpenAIEmbeddings
+from langchain.chains import ChatVectorDBChain
+from langchain.vectorstores import Chroma
+from langchain.llms import OpenAIChat
 
 
 logger = logging.getLogger()
 logger.setLevel(logging.INFO)
 
+
 @click.command()
-@click.option('--pkl-path', '-f', default='/data/vectorstore.pkl', type=click.Path(exists=True), help='Path to the vectorstore pkl file')
-def main(pkl_path):
-    with open(pkl_path, "rb") as f:
-        vectorstore = pickle.load(f)
+@click.option(
+    "--db-path",
+    "-f",
+    default="/data/vectorstore",
+    type=click.Path(exists=True),
+    help="Path to the vectorstore database dir",
+)
+def main(db_path):
+    embedding = OpenAIEmbeddings()
+    vectorstore = Chroma(persist_directory=db_path, embedding_function=embedding)
 
     manager = CallbackManager([StreamingStdOutCallbackHandler(), OpenAICallbackHandler()])
 
@@ -34,19 +42,17 @@ def main(pkl_path):
     question_generator = LLMChain(llm=question_gen_llm, prompt=CONDENSE_QUESTION_PROMPT)
 
     # 回答に情報ソースを表示する場合
-    #doc_chain = load_qa_with_sources_chain(
-    #    streaming_llm, 
+    # doc_chain = load_qa_with_sources_chain(
+    #    streaming_llm,
     #    chain_type="stuff",
     #    callback_manager=manager,
-    #)
+    # )
 
     prompt_template = """Use the following pieces of context to answer the question at the end.
 {context}
 Question: {question}
 Helpful Answer:"""
-    QA_PROMPT = PromptTemplate(
-        template=prompt_template, input_variables=["context", "question"]
-    )
+    QA_PROMPT = PromptTemplate(template=prompt_template, input_variables=["context", "question"])
     doc_chain = load_qa_chain(streaming_llm, chain_type="stuff", prompt=QA_PROMPT)
 
     chat_history = []
@@ -64,11 +70,11 @@ Helpful Answer:"""
                 print("[AI]:")
                 report = []
                 for resp in openai.ChatCompletion.create(
-                        model="gpt-3.5-turbo",
-                        messages=messages,
-                        temperature=0.5,
-                        stream=True,
-                    ):
+                    model="gpt-3.5-turbo",
+                    messages=messages,
+                    temperature=0.5,
+                    stream=True,
+                ):
                     token = resp["choices"][0]["delta"].get("content", "")
                     report.append(token)
                     answer = "".join(report).strip()
@@ -87,6 +93,6 @@ Helpful Answer:"""
         except Exception as e:
             logger.exception(e)
 
-if __name__ == '__main__':
-    main()
 
+if __name__ == "__main__":
+    main()

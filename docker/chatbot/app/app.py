@@ -13,15 +13,18 @@ from langchain.callbacks.streaming_stdout import StreamingStdOutCallbackHandler
 from langchain.chains.chat_vector_db.prompts import CONDENSE_QUESTION_PROMPT, QA_PROMPT
 from langchain.chains.question_answering import load_qa_chain
 from langchain.chains.qa_with_sources import load_qa_with_sources_chain
-from langchain.vectorstores.base import VectorStore
+from langchain.embeddings.openai import OpenAIEmbeddings
+from langchain.vectorstores import Chroma
 from langchain.chains import ChatVectorDBChain
+from langchain.chains import VectorDBQA
 from langchain.prompts.prompt import PromptTemplate
+from langchain.agents import initialize_agent, Tool
 from http.server import BaseHTTPRequestHandler, HTTPServer
 
 PORT = 5000
 if os.path.exists(sys.argv[1]):
-    with open(sys.argv[1], "rb") as f:
-        vectorstore = pickle.load(f)
+    embedding = OpenAIEmbeddings()
+    vectorstore = Chroma(persist_directory=sys.argv[1], embedding_function=embedding)
 
 
 class StreamingLLMCallbackHandler(StreamingStdOutCallbackHandler):
@@ -64,10 +67,33 @@ Helpful Answer:"""
     # )
     doc_chain = load_qa_chain(streaming_llm, chain_type="stuff", prompt=QA_PROMPT)
     question_generator = LLMChain(llm=question_gen_llm, prompt=CONDENSE_QUESTION_PROMPT)
-    qa = ChatVectorDBChain(
-        vectorstore=vectorstore, combine_docs_chain=doc_chain, question_generator=question_generator
-    )
+    qa = ChatVectorDBChain(vectorstore=vectorstore, combine_docs_chain=doc_chain, question_generator=question_generator)
     return qa
+
+
+# Agent VectorDB Question Answering
+def create_db_qa(sock, temperature=0.5, target="openai"):
+    manager = CallbackManager([StreamingLLMCallbackHandler(sock)])
+    streaming_llm = ChatOpenAI(
+        streaming=True,
+        model_name="gpt-3.5-turbo",
+        callback_manager=manager,
+        temperature=temperature,
+        verbose=True,
+    )
+    chain = VectorDBQA.from_chain_type(
+        llm=streaming_llm, chain_type="stuff", vectorstore=vectorstore, input_key="question"
+    )
+
+    tools = [
+        Tool(
+            name="local q and a",
+            func=chain.run,
+            description=f"useful for when you need to answer questions about {target}. Input should be a fully formed question.",
+        ),
+    ]
+    agent = initialize_agent(tools, streaming_llm, agent="zero-shot-react-description", max_iterations=3)
+    return agent
 
 
 class ApiHandler(BaseHTTPRequestHandler):
@@ -113,8 +139,10 @@ class ApiHandler(BaseHTTPRequestHandler):
                     prev_user_content = elem["content"]
                 elif elem["role"] == "assistant":
                     chat_history.append((prev_user_content, elem["content"]))
-            qa = create_qa(self, temperature)
-            qa({"question": question, "chat_history": chat_history})
+            # qa = create_qa(self, temperature)
+            # qa({"question": question, "chat_history": chat_history})
+            agent = create_db_qa(self, temperature=0.5, target="openai")
+            agent.run(question)
         self.wfile.write(b"data: [DONE]\n\n")
 
 

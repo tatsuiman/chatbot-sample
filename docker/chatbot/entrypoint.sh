@@ -1,2 +1,2 @@
 #!/bin/bash
-python -u app.py ${DB_FILE}
+python -u app.py ${DB_DIR}
