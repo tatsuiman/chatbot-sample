@@ -1,2 +1,3 @@
 #!/bin/bash
-python -u app.py ${DB_FILE}
+echo load ${DB_DIR}
+python -u app.py ${DB_DIR}
