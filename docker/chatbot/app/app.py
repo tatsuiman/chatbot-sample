@@ -44,36 +44,10 @@ class StreamingLLMCallbackHandler(StreamingStdOutCallbackHandler):
         self.sock.wfile.write(b"data: " + json.dumps(data).encode() + b"\n\n")
         self.sock.wfile.flush()
 
-
-def create_qa(sock, temperature=0.5):
-    manager = CallbackManager([StreamingLLMCallbackHandler(sock)])
-    question_gen_llm = ChatOpenAI(temperature=0, model_name="gpt-3.5-turbo", verbose=True)
-    streaming_llm = ChatOpenAI(
-        streaming=True,
-        model_name="gpt-3.5-turbo",
-        callback_manager=manager,
-        temperature=temperature,
-        verbose=True,
-    )
-
-    prompt_template = """Use the following pieces of context to answer the question at the end.
-{context}
-Question: {question}
-Helpful Answer:"""
-    QA_PROMPT = PromptTemplate(template=prompt_template, input_variables=["context", "question"])
-    # doc_chain = load_qa_with_sources_chain(
-    #    streaming_llm,
-    #    chain_type="stuff"
-    # )
-    doc_chain = load_qa_chain(streaming_llm, chain_type="stuff", prompt=QA_PROMPT)
-    question_generator = LLMChain(llm=question_gen_llm, prompt=CONDENSE_QUESTION_PROMPT)
-    qa = ChatVectorDBChain(vectorstore=vectorstore, combine_docs_chain=doc_chain, question_generator=question_generator)
-    return qa
-
-
 # Agent VectorDB Question Answering
-def create_db_qa(sock, temperature=0.5, target="openai"):
+def create_db_qa(sock, temperature=0.5, target="internal documents"):
     manager = CallbackManager([StreamingLLMCallbackHandler(sock)])
+    llm = ChatOpenAI(temperature=0, model_name="gpt-3.5-turbo", verbose=True)
     streaming_llm = ChatOpenAI(
         streaming=True,
         model_name="gpt-3.5-turbo",
@@ -82,7 +56,7 @@ def create_db_qa(sock, temperature=0.5, target="openai"):
         verbose=True,
     )
     chain = VectorDBQA.from_chain_type(
-        llm=streaming_llm, chain_type="stuff", vectorstore=vectorstore, input_key="question"
+        llm=llm, chain_type="stuff", vectorstore=vectorstore, input_key="question"
     )
 
     tools = [
@@ -139,8 +113,6 @@ class ApiHandler(BaseHTTPRequestHandler):
                     prev_user_content = elem["content"]
                 elif elem["role"] == "assistant":
                     chat_history.append((prev_user_content, elem["content"]))
-            # qa = create_qa(self, temperature)
-            # qa({"question": question, "chat_history": chat_history})
             agent = create_db_qa(self, temperature=0.5, target="openai")
             agent.run(question)
         self.wfile.write(b"data: [DONE]\n\n")
