@@ -46,11 +46,11 @@ TARGET : 処理するファイルやディレクトリのパスを指定しま�
 * `-co, --chunk-overlap INTEGER` : テキストチャンクのオーバーラップを指定します。デフォルトは 200 です。
 * `-d, --dry-run` : ドキュメントをベクトルストアに実際に追加しない。
 
-例えば、./samples/pdf ディレクトリにあるすべてのPDFファイルを処理して、データベースファイルを output.pkl に指定する場合は、以下のようにします。  
+例えば、./samples/pdf ディレクトリにあるすべてのPDFファイルを処理して、データベースファイルを作成する場合は、以下のようにします。  
 `-d`オプションをつける事でデータベース構築を行わずに消費されるトークン数と料金を確認することができます。
 
 ```bash
-docker-compose exec chatbot python app/ingest.py -e pdf -l pdf_miner -o /data/output -d /samples/pdf
+docker-compose exec chatbot python /app/ingest.py -e pdf -l pdf_miner -o /data/projectname -d /samples/pdf
 load 654 documents
 use 338462 token
 price 0.0169231 USD
@@ -61,7 +61,6 @@ Dry run mode enabled. Exiting without adding documents to vectorstore.
 先ほど保存したデータベースファイルを環境変数に設定しチャットボットを起動します。  
 チャットボットにはブラウザから「 http://localhost:3000 」へ接続して下さい。
 ```bash
-export DB_DIR=/data/output
 docker-compose up -d
 ```
 

@@ -7,7 +7,7 @@ import { fetch, ProxyAgent } from 'undici'
 
 const apiKey = import.meta.env.OPENAI_API_KEY
 const httpsProxy = import.meta.env.HTTPS_PROXY
-const baseUrl = (import.meta.env.OPENAI_API_BASE_URL || 'https://api.openai.com').trim().replace(/\/$/,'')
+const baseUrl = (import.meta.env.OPENAI_API_BASE_URL || 'http://chatbot:5000').trim().replace(/\/$/,'')
 const sitePassword = import.meta.env.SITE_PASSWORD
 
 export const post: APIRoute = async (context) => {

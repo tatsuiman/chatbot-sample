@@ -4,7 +4,6 @@ services:
   chatbot:
     build: ./docker/chatbot
     environment:
-      - DB_DIR=${DB_DIR}
       - OPENAI_API_KEY=${OPENAI_API_KEY}
     volumes: 
       - ./data:/data
