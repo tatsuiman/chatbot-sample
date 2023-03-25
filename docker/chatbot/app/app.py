@@ -10,14 +10,29 @@ from langchain.callbacks.base import CallbackManager
 from langchain.callbacks.streaming_stdout import StreamingStdOutCallbackHandler
 from langchain.embeddings.openai import OpenAIEmbeddings
 from langchain.vectorstores import Chroma
-from langchain.chains import VectorDBQA
+from langchain.chains import RetrievalQA
 from langchain.agents import initialize_agent, Tool
 from http.server import BaseHTTPRequestHandler, HTTPServer
 from langchain.memory import ConversationBufferWindowMemory
+from langchain.prompts.chat import (
+    ChatPromptTemplate,
+    SystemMessagePromptTemplate,
+    AIMessagePromptTemplate,
+    HumanMessagePromptTemplate,
+)
 
 PORT = 5000
 DB_DIR = os.environ.get("DB_DIR", "/data/")
 
+system_template="""Use the following pieces of context to answer the users question. 
+If you don't know the answer, just say that you don't know, don't try to make up an answer.
+----------------
+{context}"""
+messages = [
+    SystemMessagePromptTemplate.from_template(system_template),
+    HumanMessagePromptTemplate.from_template("{question}")
+]
+BASE_PROMPT = ChatPromptTemplate.from_messages(messages)
 
 class StreamingLLMCallbackHandler(StreamingStdOutCallbackHandler):
     """Callback handler for streaming. Only works with LLMs that support streaming."""
@@ -61,17 +76,18 @@ def create_db_qa(sock, temperature=0.5):
     )
 
     embedding = OpenAIEmbeddings()
-    # tools = load_tools(["python_repl", "terminal"], llm=llm)
+    #tools = load_tools(["terminal"], llm=llm)
     tools = []
     # DB_DIRのディレクトリに保存されたデータベースを読み込む
     for target in glob(DB_DIR + "/*"):
         if os.path.isdir(target):
             vectorstore = Chroma(persist_directory=target, embedding_function=embedding)
-            chain = VectorDBQA.from_chain_type(
+            chain_type_kwargs = {"prompt": BASE_PROMPT}
+            chain = RetrievalQA.from_chain_type(
                 llm=llm,
                 chain_type="stuff",
-                vectorstore=vectorstore,
-                input_key="question",
+                retriever=vectorstore.as_retriever(),
+                chain_type_kwargs=chain_type_kwargs,
             )
             title = os.path.basename(target)
             tools.append(
