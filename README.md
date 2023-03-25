@@ -6,7 +6,7 @@
 [ChatGPTで社内用チャットボットを作った話](https://zenn.dev/tatsui/articles/langchain-chatbot)の記事で仕組みを紹介しています。
 
 ## Demo
-![](./docs/img/demo.gif)
+![](./docs/img/chatbot-demo.gif)
 
 ## よくある疑問
 * データ利用ポリシーについて
