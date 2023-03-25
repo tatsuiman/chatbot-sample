@@ -18,6 +18,7 @@ from langchain.memory import ConversationBufferWindowMemory
 PORT = 5000
 DB_DIR = os.environ.get("DB_DIR", "/data/")
 
+
 class StreamingLLMCallbackHandler(StreamingStdOutCallbackHandler):
     """Callback handler for streaming. Only works with LLMs that support streaming."""
 
@@ -60,7 +61,7 @@ def create_db_qa(sock, temperature=0.5):
     )
 
     embedding = OpenAIEmbeddings()
-    #tools = load_tools(["python_repl", "terminal"], llm=llm)
+    # tools = load_tools(["python_repl", "terminal"], llm=llm)
     tools = []
     # DB_DIRのディレクトリに保存されたデータベースを読み込む
     for target in glob(DB_DIR + "/*"):
