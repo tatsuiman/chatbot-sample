@@ -2,6 +2,8 @@ import os
 import sys
 import json
 import time
+import shodan
+import requests
 from glob import glob
 from typing import Any, Dict, List
 from langchain.agents import load_tools
@@ -11,6 +13,7 @@ from langchain.callbacks.streaming_stdout import StreamingStdOutCallbackHandler
 from langchain.embeddings.openai import OpenAIEmbeddings
 from langchain.vectorstores import Chroma
 from langchain.chains import RetrievalQA
+from langchain.utilities import GoogleSearchAPIWrapper
 from langchain.agents import initialize_agent, Tool
 from http.server import BaseHTTPRequestHandler, HTTPServer
 from langchain.memory import ConversationBufferWindowMemory
@@ -20,19 +23,22 @@ from langchain.prompts.chat import (
     AIMessagePromptTemplate,
     HumanMessagePromptTemplate,
 )
+from intel import search_intelx, shodan_host
 
 PORT = 5000
 DB_DIR = os.environ.get("DB_DIR", "/data/")
 
-system_template="""Use the following pieces of context to answer the users question. 
+system_template = """Use the following pieces of context to answer the users question. 
 If you don't know the answer, just say that you don't know, don't try to make up an answer.
-----------------
+------------
+
 {context}"""
 messages = [
     SystemMessagePromptTemplate.from_template(system_template),
-    HumanMessagePromptTemplate.from_template("{question}")
+    HumanMessagePromptTemplate.from_template("{question}"),
 ]
 BASE_PROMPT = ChatPromptTemplate.from_messages(messages)
+
 
 class StreamingLLMCallbackHandler(StreamingStdOutCallbackHandler):
     """Callback handler for streaming. Only works with LLMs that support streaming."""
@@ -66,7 +72,6 @@ class StreamingLLMCallbackHandler(StreamingStdOutCallbackHandler):
 # Agent VectorDB Question Answering
 def create_db_qa(sock, temperature=0.5):
     manager = CallbackManager([StreamingLLMCallbackHandler(sock)])
-    llm = ChatOpenAI(temperature=0, model_name="gpt-3.5-turbo")
     streaming_llm = ChatOpenAI(
         streaming=True,
         model_name="gpt-3.5-turbo",
@@ -76,15 +81,26 @@ def create_db_qa(sock, temperature=0.5):
     )
 
     embedding = OpenAIEmbeddings()
-    #tools = load_tools(["terminal"], llm=llm)
-    tools = []
+    # tools = []
+    tools = load_tools(["terminal"], llm=streaming_llm)
+
+    if os.environ.get("GOOGLE_CSE_ID") and os.environ.get("GOOGLE_API_KEY"):
+        google_search = GoogleSearchAPIWrapper(k=5)
+        tools.append(Tool(name="Google Search", func=google_search.run, description="最新の話題について答える場合に利用することができます。"))
+    if os.environ.get("SHODAN_API_KEY"):
+        tools.append(Tool(name="Shodan Search", func=shodan_host, description="IPアドレスやホスト名の文字列をキーにして詳細な情報を得ることができます。"))
+    if os.environ.get("INTELX_API_KEY"):
+        tools.append(
+            Tool(name="IntelligenceX Search", func=search_intelx, description="IPアドレスの文字列をキーとして関連した脅威情報の一覧を確認できます。")
+        )
+
     # DB_DIRのディレクトリに保存されたデータベースを読み込む
     for target in glob(DB_DIR + "/*"):
         if os.path.isdir(target):
             vectorstore = Chroma(persist_directory=target, embedding_function=embedding)
             chain_type_kwargs = {"prompt": BASE_PROMPT}
             chain = RetrievalQA.from_chain_type(
-                llm=llm,
+                llm=streaming_llm,
                 chain_type="stuff",
                 retriever=vectorstore.as_retriever(),
                 chain_type_kwargs=chain_type_kwargs,
@@ -97,7 +113,8 @@ def create_db_qa(sock, temperature=0.5):
                     description=f"useful for when you need to answer questions about {title}. Input should be a fully formed question.",
                 ),
             )
-    agent = "chat-zero-shot-react-description"
+    # agent = "conversational-react-description"
+    agent = os.environ.get("AGENT", "chat-zero-shot-react-description")
     return initialize_agent(
         tools,
         streaming_llm,

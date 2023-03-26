@@ -6,7 +6,7 @@
 [ChatGPTで社内用チャットボットを作った話](https://zenn.dev/tatsui/articles/langchain-chatbot)の記事で仕組みを紹介しています。
 
 ## Demo
-![](./docs/img/chatbot-demo.gif)
+![](./docs/img/intelx-demo.gif)
 
 ## よくある疑問
 * データ利用ポリシーについて
@@ -20,13 +20,20 @@
   * 本サンプルではChatGPT APIを利用します。
   * ChatGPT APIを利用するには、OpenAIのアカウントを作成し、APIキーを発行する必要があります。
 
+## インストール
 ## APIキーの設定
-```
+```bash
 export OPENAI_API_KEY=<Open AI API Key>
 ```
 
-## インストール
+Google検索が必要な場合は[LangChain の Googleカスタム検索 連携を試す](https://note.com/npaka/n/nd9a4a26a8932)を参考に以下を設定します。
+```bash
+export GOOGLE_CSE_ID=
+export GOOGLE_API_KEY=
 ```
+
+コンテナのビルド
+```bash
 docker-compose up -d --build chatbot
 ```
 
@@ -64,14 +71,7 @@ Dry run mode enabled. Exiting without adding documents to vectorstore.
 docker-compose up -d
 ```
 
-## コマンドラインからチャットボットを利用する
-質問に答えられなかったり、チャットの履歴を使ってMarkdownで図を書く場合は  
-「>」を入力してから質問することでChatGPTへの質問に切り替えることができます。
-```bash
-python chat-cli.py -f data/output
-```
-
 ## 参考
 * https://dev.classmethod.jp/articles/openai-data-usage-policy/
-* https://github.com/ddiu8081/chatgpt-demo
 * https://github.com/hwchase17/chat-langchain
+* https://github.com/mckaywrigley/chatbot-ui

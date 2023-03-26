@@ -1,7 +1,7 @@
 FROM python:3.10
 
 # Tiktoken requires Rust toolchain, so build it in a separate stage
-RUN apt-get update && apt-get install -y gcc curl
+RUN apt-get update && apt-get install -y gcc curl dnsutils iputils-ping net-tools whois nmap
 RUN curl https://sh.rustup.rs -sSf | sh -s -- -y && apt-get install --reinstall libc6-dev -y
 ENV PATH="/root/.cargo/bin:${PATH}"
 
