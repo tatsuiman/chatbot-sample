@@ -4,26 +4,58 @@ services:
   chatbot:
     build: ./docker/chatbot
     environment:
-      - OPENAI_API_KEY=${OPENAI_API_KEY}
       - GOOGLE_CSE_ID=${GOOGLE_CSE_ID}
       - GOOGLE_API_KEY=${GOOGLE_API_KEY}
       - SHODAN_API_KEY=${SHODAN_API_KEY}
       - INTELX_API_KEY=${INTELX_API_KEY}
+      - LANGCHAIN_ENDPOINT=http://langchain-backend:8000
     volumes: 
       - ./data:/data
       - ./samples:/samples
     restart: always
 
   frontend:
-    build: docker/frontend
+    image: ghcr.io/mckaywrigley/chatbot-ui:main
     environment:
       - OPENAI_API_KEY=${OPENAI_API_KEY}
+      - OPENAI_API_HOST=http://chatbot:5000
     ports:
       - 3000:3000
-  uml:
-    image: plantuml/plantuml-server:tomcat
-    ports:
-      - 8080:8080
-    environment:
-      - BASE_URL=plantuml
 
+  plugin:
+    build: ./docker/plugin
+    ports:
+      - 5000:5000
+    environment:
+      - SHODAN_API_KEY=${SHODAN_API_KEY}
+      - INTELX_API_KEY=${INTELX_API_KEY}
+
+  langchain-frontend:
+    image: notlangchain/langchainplus-frontend:latest
+    ports:
+      - 4173:4173
+    environment:
+      - BACKEND_URL=http://langchain-backend:8000
+      - PUBLIC_BASE_URL=http://localhost:8000
+      - PUBLIC_DEV_MODE=true
+    depends_on:
+      - langchain-backend
+
+  langchain-backend:
+    image: notlangchain/langchainplus:latest
+    environment:
+      - PORT=8000
+      - LANGCHAIN_ENV=local
+    ports:
+      - 8000:8000
+    depends_on:
+      - langchain-db
+
+  langchain-db:
+    image: postgres:14.1
+    environment:
+      - POSTGRES_PASSWORD=postgres
+      - POSTGRES_USER=postgres
+      - POSTGRES_DB=postgres
+    ports:
+      - 5432:5432

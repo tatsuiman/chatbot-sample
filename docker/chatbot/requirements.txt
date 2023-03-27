@@ -1,7 +1,7 @@
 openai
 tiktoken
 faiss-cpu
-langchain
+langchain==0.0.123
 chromadb
 isort
 pydantic
