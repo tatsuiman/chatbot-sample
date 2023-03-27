@@ -18,6 +18,7 @@ def custom_openapi():
         title="Your API",
         version="1.0.0",
         description="API for intelligence tools",
+        servers=[{"url": f"http://plugin:5000/"}],
         routes=app.routes,
     )
     # 設定の変更
