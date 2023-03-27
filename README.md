@@ -8,7 +8,7 @@ You can import source code and document files stored on your local PC.
 The article [ChatGPT Chatbot for Internal Use](https://zenn.dev/tatsui/articles/langchain-chatbot) introduces the mechanism.
 
 ## Demo
-![](. /docs/img/intelx-demo.gif)
+![](./docs/img/intelx-demo.gif)
 
 ## Frequently Asked Questions.
 * Data usage policy
