@@ -123,13 +123,13 @@ def create_db_qa(sock, api_key, temperature=0.5):
 
     embedding = OpenAIEmbeddings(openai_api_key=api_key)
     #tools = []
-    tools = load_tools(["requests"], llm=streaming_llm)
+    tools = load_tools(["terminal", "requests"], llm=streaming_llm)
     PLUGIN_TOOL = AIPluginTool.from_plugin_url("http://plugin:5000/openai")
     tools.append(PLUGIN_TOOL)
 
-    #if os.environ.get("GOOGLE_CSE_ID") and os.environ.get("GOOGLE_API_KEY"):
-    #    google_search = GoogleSearchAPIWrapper(k=5)
-    #    tools.append(Tool(name="Google Search", func=google_search.run, description="最新の話題について答える場合に利用することができます。"))
+    if os.environ.get("GOOGLE_CSE_ID") and os.environ.get("GOOGLE_API_KEY"):
+        google_search = GoogleSearchAPIWrapper(k=5)
+        tools.append(Tool(name="Google Search", func=google_search.run, description="最新の話題について答える場合に利用することができます。"))
 
     #if os.environ.get("SHODAN_API_KEY"):
     #    tools.append(
