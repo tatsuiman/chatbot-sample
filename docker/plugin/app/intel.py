@@ -23,7 +23,7 @@ def search_intelx(term):
         }
         r = requests.post("https://2.intelx.io/intelligent/search", headers=h, json=p)
         search_id = r.json()["id"]
-        r = requests.get(f"https://2.intelx.io/intelligent/search/result?id={search_id}&limit=20", headers=h)
+        r = requests.get(f"https://2.intelx.io/intelligent/search/result?id={search_id}&limit=5", headers=h)
         for record in r.json()["records"]:
             result = {}
             result["added"] = record["added"]
