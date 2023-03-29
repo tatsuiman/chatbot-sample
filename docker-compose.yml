@@ -46,8 +46,6 @@ services:
     environment:
       - PORT=8000
       - LANGCHAIN_ENV=local
-    ports:
-      - 8000:8000
     depends_on:
       - langchain-db
 
