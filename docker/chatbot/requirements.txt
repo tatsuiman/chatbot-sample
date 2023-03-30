@@ -11,4 +11,3 @@ unstructured
 unstructured[local-inference]
 pdfminer.six
 google-api-python-client
-shodan

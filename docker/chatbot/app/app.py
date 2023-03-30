@@ -10,6 +10,7 @@ from typing import Any, Dict, List, Optional
 from langchain.agents import load_tools
 from langchain.tools import AIPluginTool
 from langchain.chat_models import ChatOpenAI
+from langchain.llms import OpenAI
 from langchain.callbacks.base import CallbackManager
 from langchain.callbacks.streaming_stdout import StreamingStdOutCallbackHandler
 from langchain.embeddings.openai import OpenAIEmbeddings
@@ -27,7 +28,6 @@ from langchain.prompts.chat import (
     AIMessagePromptTemplate,
     HumanMessagePromptTemplate,
 )
-from intel import search_intelx, shodan_host
 
 PORT = 5000
 DB_DIR = os.environ.get("DB_DIR", "/data/")
@@ -131,37 +131,26 @@ def create_db_qa(sock, api_key, temperature=0.5):
         google_search = GoogleSearchAPIWrapper(k=5)
         tools.append(Tool(name="Google Search", func=google_search.run, description="最新の話題について答える場合に利用することができます。"))
 
-    #if os.environ.get("SHODAN_API_KEY"):
-    #    tools.append(
-    #        Tool(
-    #            name="Shodan Search", func=shodan_host, description="IPアドレスやホスト名の文字列をキーにして開いているポートや脆弱性などの情報を得ることができます。"
-    #        )
-    #    )
-    #if os.environ.get("INTELX_API_KEY"):
-    #    tools.append(
-    #        Tool(name="IntelligenceX Search", func=search_intelx, description="IPアドレスの文字列をキーとして関連した脅威情報の一覧を確認できます。")
-    #    )
-
     # DB_DIRのディレクトリに保存されたデータベースを読み込む
-    #for target in glob(DB_DIR + "/*"):
-    #    if os.path.isdir(target):
-    #        vectorstore = Chroma(persist_directory=target, embedding_function=embedding)
-    #        chain_type_kwargs = {"prompt": BASE_PROMPT}
-    #        chain = RetrievalQA.from_chain_type(
-    #            llm=streaming_llm,
-    #            chain_type="stuff",
-    #            callback_manager=manager,
-    #            retriever=vectorstore.as_retriever(),
-    #            chain_type_kwargs=chain_type_kwargs,
-    #        )
-    #        title = os.path.basename(target)
-    #        tools.append(
-    #            Tool(
-    #                name=f"{title} qa database",
-    #                func=chain.run,
-    #                description=f"useful for when you need to answer questions about {title}. Input should be a fully formed question.",
-    #            ),
-    #        )
+    for target in glob(DB_DIR + "/*"):
+        if os.path.isdir(target):
+            vectorstore = Chroma(persist_directory=target, embedding_function=embedding)
+            chain_type_kwargs = {"prompt": BASE_PROMPT}
+            chain = RetrievalQA.from_chain_type(
+                llm=streaming_llm,
+                chain_type="stuff",
+                callback_manager=manager,
+                retriever=vectorstore.as_retriever(),
+                chain_type_kwargs=chain_type_kwargs,
+            )
+            title = os.path.basename(target)
+            tools.append(
+                Tool(
+                    name=f"{title} qa database",
+                    func=chain.run,
+                    description=f"useful for when you need to answer questions about {title}. Input should be a fully formed question.",
+                ),
+            )
     # agent = "conversational-react-description"
     agent = os.environ.get("AGENT", "chat-zero-shot-react-description")
     memory = ConversationBufferWindowMemory(

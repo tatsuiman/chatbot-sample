@@ -6,8 +6,6 @@ services:
     environment:
       - GOOGLE_CSE_ID=${GOOGLE_CSE_ID}
       - GOOGLE_API_KEY=${GOOGLE_API_KEY}
-      - SHODAN_API_KEY=${SHODAN_API_KEY}
-      - INTELX_API_KEY=${INTELX_API_KEY}
       - LANGCHAIN_ENDPOINT=http://langchain-backend:8000
     volumes: 
       - ./data:/data
